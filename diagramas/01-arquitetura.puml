@@ -1,67 +1,80 @@
 @startuml 01-arquitetura
-title Arquitetura geral - Construtor de Fluxos
+title Arquitetura alvo - Construtor e simulador de fluxos
 
+left to right direction
 skinparam componentStyle rectangle
-skinparam folderBackgroundColor #FDF6E3
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
 skinparam packageBackgroundColor #EEF4FA
+skinparam packageBorderColor #5C7185
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #5C7185
+skinparam ArrowColor #526477
+skinparam noteBackgroundColor #FFF8DC
+skinparam noteBorderColor #B79A51
 
-package "Construtor de Fluxos\n(builder.html)" as Construtor {
-  [Editor visual\n(formularios estruturados)] as Editor
-  [Validador de definicao] as Validador
-  [Pre-visualizacao do fluxo] as Preview
-  database "Rascunho\n(localStorage)" as Rascunho
+actor "Usuario" as User
+file "Arquivo local\n.fluxo.json" as FlowFile
+rectangle "GitHub Pages\nHTML + CSS + JS estaticos" as Hosting
+
+package "Aplicacao no navegador" {
+  package "Interface" {
+    [Editor visual] as Editor
+    [Importar arquivo] as Import
+    [Exportar arquivo] as Export
+    [Controles de simulacao] as SimControls
+  }
+
+  package "Definicao do fluxo" {
+    [Validador] as Validator
+    [Definicao em memoria\n(atores, campos, etapas,\nregras e transicoes)] as Definition
+  }
+
+  package "Execucao" {
+    [Motor de simulacao] as Engine
+    [Estado da simulacao\n(entradas e status das etapas)] as Runtime
+  }
+
+  package "Apresentacao" {
+    [Renderizador] as Renderer
+    [Componentes visuais\njs/core/flow-ui.js] as FlowUI
+    [CSS compartilhado] as CSS
+  }
 }
 
-folder "definitions/" as Defs {
-  file "processo-a.js" as DefA
-  file "processo-b.js" as DefB
-  file "... .js" as DefOutros
-}
+Hosting --> Editor : publica a aplicacao
+User --> Editor : cria e edita
+User --> Import : escolhe arquivo
+FlowFile --> Import : File API no navegador
+Import --> Validator : interpreta JSON
+Definition --> Editor : carrega para edicao
+Editor --> Validator : valida alteracoes
+Validator --> Definition : aceita definicao valida
+User --> Export : solicita download
+Definition --> Export : serializa JSON
+Export --> FlowFile : baixa arquivo via Blob
+Definition --> Engine : fornece etapas e regras
+SimControls --> Engine : inicia, reinicia ou decide
+Engine --> Runtime : calcula transicoes e status
+Definition --> Renderer : fornece estrutura do fluxo
+Runtime --> Renderer : fornece estado atual
+Renderer --> FlowUI : monta elementos
+FlowUI --> CSS : aplica estilos
 
-package "Motor de Simulacao\n(js/engine/)" as Motor {
-  [Carregador de\ndefinicao] as Loader
-  [Maquina de estados] as FSM
-  [Avaliador de regras] as Rules
-  [Renderizador] as Renderer
-  [Relogio simulado] as Clock
-  [Barra de status] as StatusBar
-}
-
-package "Nucleo visual\n(js/core + css)" as Core {
-  [flow-ui.js] as FlowUI
-  [base.css / flow.css /\nstatus-bar.css] as Css
-}
-
-package "Paginas de processo\n(uma casca HTML por fluxo)" as Pages {
-  file "processo-a.html" as PageA
-  file "processo-b.html" as PageB
-}
-
-Editor --> Validador : valida definicao
-Editor --> Rascunho : salva rascunho automatico
-Editor --> Preview : pre-visualiza via motor
-Editor ..> DefA : exporta / importa\narquivo de definicao
-Editor ..> DefB : exporta / importa
-
-PageA --> Loader : carrega definicao
-PageB --> Loader
-Loader --> DefA : le window.FLOW_DEFINITION
-Loader --> DefB
-Loader --> FSM : inicializa estado
-FSM --> Rules : avalia condicoes e transicoes
-FSM --> Clock : controla data simulada
-FSM --> Renderer : redesenha fluxo
-FSM --> StatusBar : atualiza indicadores
-Renderer --> FlowUI : usa componentes genericos
-Renderer --> Css : estilos compartilhados
-
-note bottom of Motor
-  Nenhum comportamento de processo vive no motor:
-  tudo vem da definicao gerada pelo construtor.
+note right of Hosting
+  O Pages apenas serve os arquivos estaticos.
+  Importacao e exportacao acontecem no navegador;
+  arquivos do usuario nao sao enviados ao Pages.
 end note
 
-note bottom of Pages
-  Cada pagina e apenas uma casca:
-  CSS + motor + arquivo de definicao.
+note bottom of Definition
+  Regras declarativas: o motor interpreta operadores
+  permitidos, sem executar codigo arbitrario do JSON.
 end note
+
+legend bottom
+  Arquitetura alvo: editor, validador e motor ainda precisam ser implementados.
+  flow-ui.js e os arquivos CSS ja existem.
+endlegend
 @enduml
