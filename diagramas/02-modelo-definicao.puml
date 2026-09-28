@@ -1,0 +1,99 @@
+@startuml 02-modelo-definicao
+title Modelo da definicao de fluxo (gerada pelo construtor)
+
+skinparam classAttributeIconSize 0
+
+class FlowDefinition {
+  +id : texto (ex. "meu-processo")
+  +titulo : texto
+  +descricao : texto
+  +versao : numero
+  +relogioHabilitado : booleano
+}
+
+class Actor {
+  +id : texto
+  +nome : texto (ex. "Solicitante", "Aprovador")
+}
+
+class InputField {
+  +id : texto
+  +rotulo : texto
+  +tipo : FieldType
+  +obrigatorio : booleano
+  +opcoes : lista (quando selecao)
+}
+
+enum FieldType {
+  DATA
+  NUMERO
+  TEXTO
+  SELECAO
+  CHECKBOX
+}
+
+class ComputedVar {
+  +id : texto
+  +rotulo : texto
+  +formula : texto (catalogo de funcoes)
+  +exemplo : "mesesEntre(campoData, dataSimulada)"
+}
+
+class Step {
+  +id : texto
+  +titulo : texto
+  +tipo : StepType
+  +atorId : referencia (quando DECISAO)
+  +textoAprovar : texto
+  +textoRecusar : texto
+}
+
+enum StepType {
+  FORMULARIO
+  DECISAO
+  AUTOMATICA
+  RAMIFICACAO
+  EVENTO
+}
+
+class Transition {
+  +deStepId : referencia
+  +paraStepId : referencia
+  +condicaoId : referencia (opcional)
+}
+
+class Rule {
+  +id : texto
+  +combinador : E | OU
+}
+
+class Condition {
+  +campo : referencia (input ou computed)
+  +operador : = | != | > | >= | < | <= | contem
+  +valor : constante ou campo
+}
+
+class StatusIndicator {
+  +id : texto
+  +rotulo : texto (ex. "Fase", "Situacao")
+}
+
+class StatusValue {
+  +texto : texto (ex. "A - Aprovada")
+  +prioridade : numero (maior vence)
+}
+
+FlowDefinition "1" *-- "1..n" Actor
+FlowDefinition "1" *-- "0..n" InputField
+FlowDefinition "1" *-- "0..n" ComputedVar
+FlowDefinition "1" *-- "1..n" Step
+FlowDefinition "1" *-- "1..n" Transition
+FlowDefinition "1" *-- "0..n" StatusIndicator
+Step --> StepType
+InputField --> FieldType
+Step "1" *-- "0..n" Rule : regras de liberacao
+Transition "1" *-- "0..1" Rule : condicao de caminho
+Rule "1" *-- "1..n" Condition
+StatusIndicator "1" *-- "1..n" StatusValue
+StatusValue "1" *-- "1" Rule : quando exibir
+@enduml

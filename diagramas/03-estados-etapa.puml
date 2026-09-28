@@ -1,0 +1,36 @@
+@startuml 03-estados-etapa
+title Ciclo de vida padrao de uma etapa\n(vocabulario unico de estados para todos os fluxos)
+
+[*] --> Aguardando : dependencias\nnao satisfeitas
+
+Aguardando --> Pendente : condicao de\nentrada satisfeita
+
+Pendente --> Aprovada : ator aprova ou\nregra automatica satisfeita
+Pendente --> Recusada : ator recusa ou\nregra automatica falha
+
+Recusada --> Pendente : nova tentativa\npermitida pela regra
+
+Aprovada --> SemEfeito : marcada\n"sem efeito"
+Aprovada --> NaoConfirmada : etapa anterior\nrevertida ou fluxo cancelado
+Recusada --> NaoConfirmada : processo cancelado\nantes da conclusao
+
+Aprovada --> [*] : fluxo concluido
+NaoConfirmada --> [*]
+SemEfeito --> [*]
+
+note right of Aguardando
+  Cinza, sem acao disponivel.
+  Ex.: etapa que depende de aprovacao previa.
+end note
+
+note right of Pendente
+  Destacada, com botoes de acao do ator.
+  Ex.: "Aprovar" / "Recusar".
+end note
+
+note right of NaoConfirmada
+  Estado final neutro: algo acima na cadeia
+  impediu a confirmacao (cancelamento,
+  recusa de etapa anterior).
+end note
+@enduml

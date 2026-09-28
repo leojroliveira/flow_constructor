@@ -1,0 +1,52 @@
+.status-bar {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  gap: 50px;
+  margin-top: 10px;
+  padding: 12px 18px;
+  border: 1px solid var(--text);
+  border-radius: 9px;
+  background: var(--text);
+  box-shadow: 0 7px 20px rgb(29 41 37 / 18%);
+}
+
+.status-item {
+  color: #b8c4be;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.status-item strong {
+  margin-left: 8px;
+  color: white;
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 800px) {
+  main {
+    min-height: 720px;
+    padding: 8px;
+  }
+
+  header {
+    align-items: flex-start;
+  }
+
+  .process-area {
+    align-items: flex-start;
+  }
+
+  .process-flow {
+    justify-content: flex-start;
+  }
+
+  .status-bar {
+    gap: 12px;
+    justify-content: space-around;
+  }
+}

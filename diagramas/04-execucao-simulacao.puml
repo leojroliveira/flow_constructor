@@ -1,0 +1,39 @@
+@startuml 04-execucao-simulacao
+title Execucao generica de uma simulacao (motor)
+
+start
+:Abrir pagina do processo (casca HTML);
+:Motor carrega a definicao (window.FLOW_DEFINITION);
+:Valida a definicao;
+if (Definicao valida?) is (nao) then
+  :Exibe erro de definicao;
+  stop
+else (sim)
+endif
+:Exibe formulario inicial\ndefinido pelo fluxo;
+
+repeat
+  :Usuario preenche as entradas;
+  :Avaliador valida regras do formulario;
+backward :Exibe mensagem de validacao;
+repeat while (Formulario valido?) is (nao)
+->sim;
+
+:Cria estado inicial da simulacao;
+
+while (Existem etapas pendentes?) is (sim)
+  :Renderiza etapas conforme o estado atual;
+  if (Etapa exige acao de ator?) then (sim)
+    :Usuario aprova ou recusa;
+  else (etapa automatica)
+    :Avaliador de regras decide o caminho;
+  endif
+  if (Regra usa data simulada?) then (sim)
+    :Relogio avanca conforme configuracao;
+  endif
+  :Atualiza estado, fluxo e barra de status;
+endwhile (nao)
+
+:Fluxo concluido;
+stop
+@enduml

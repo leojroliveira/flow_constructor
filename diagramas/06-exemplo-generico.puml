@@ -1,0 +1,37 @@
+@startuml 06-exemplo-generico
+title Validacao do modelo - processo generico de aprovacao\n(ilustracao abstrata: nao e um processo real)
+
+|Usuario|
+start
+:Abre a pagina do processo;
+:Preenche o formulario definido no fluxo
+ (campos declarados na definicao);
+
+|Motor|
+:Calcula as variaveis derivadas
+ a partir das entradas e da data simulada;
+
+if (Regras da etapa automatica\nsatisfeitas?) then (sim)
+  :Etapa "Verificacao" = APROVADA;
+  |Aprovador|
+  :Etapa de decisao fica PENDENTE
+   com botoes do ator;
+  if (Aprovador decide?) then (aprova)
+    |Motor|
+    :Etapa final = APROVADA;
+    :Exibe o resultado definido no fluxo;
+  else (recusa)
+    |Motor|
+    :Etapa final = RECUSADA;
+    :Exibe motivo e opcao de nova tentativa;
+  endif
+else (nao)
+  :Etapa "Verificacao" = RECUSADA;
+  :Exibe o que falta segundo as regras;
+endif
+
+|Usuario|
+:Observa visualmente o resultado no fluxo;
+:Reinicia e testa outro cenario;
+stop
+@enduml

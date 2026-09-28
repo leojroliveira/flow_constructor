@@ -1,0 +1,42 @@
+@startuml 05-decisao-ator
+title Decisao do ator em uma etapa (interacao basica do motor)
+
+actor Usuario
+participant "Renderizador" as R
+participant "Maquina de\nEstados" as M
+participant "Avaliador de\nRegras" as V
+participant "Relogio\nSimulado" as C
+participant "Barra de\nStatus" as S
+
+Usuario -> R : clica Aprovar / Recusar
+activate R
+R -> M : handleAction(etapaId, decisao)
+activate M
+M -> V : podeTransicionar?(estado, etapa, decisao)
+activate V
+
+alt Transicao permitida
+  V --> M : permitido
+  deactivate V
+  M -> M : aplica transicao\natualiza estado da etapa
+  M -> C : recalcula variaveis\nque dependem da data
+  activate C
+  C --> M : valores atualizados
+  deactivate C
+  M -> R : render(estado)
+  R --> Usuario : fluxo atualizado
+  M -> S : updateStatus(estado)
+  activate S
+  S --> Usuario : indicadores atualizados
+  deactivate S
+else Transicao bloqueada
+  V --> M : negado + motivo
+  deactivate V
+  M -> R : exibe mensagem de validacao
+  R --> Usuario : motivo da recusa
+end
+
+deactivate M
+deactivate R
+@enduml
+@enduml

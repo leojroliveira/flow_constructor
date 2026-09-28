@@ -1,0 +1,67 @@
+@startuml 01-arquitetura
+title Arquitetura geral - Construtor de Fluxos
+
+skinparam componentStyle rectangle
+skinparam folderBackgroundColor #FDF6E3
+skinparam packageBackgroundColor #EEF4FA
+
+package "Construtor de Fluxos\n(builder.html)" as Construtor {
+  [Editor visual\n(formularios estruturados)] as Editor
+  [Validador de definicao] as Validador
+  [Pre-visualizacao do fluxo] as Preview
+  database "Rascunho\n(localStorage)" as Rascunho
+}
+
+folder "definitions/" as Defs {
+  file "processo-a.js" as DefA
+  file "processo-b.js" as DefB
+  file "... .js" as DefOutros
+}
+
+package "Motor de Simulacao\n(js/engine/)" as Motor {
+  [Carregador de\ndefinicao] as Loader
+  [Maquina de estados] as FSM
+  [Avaliador de regras] as Rules
+  [Renderizador] as Renderer
+  [Relogio simulado] as Clock
+  [Barra de status] as StatusBar
+}
+
+package "Nucleo visual\n(js/core + css)" as Core {
+  [flow-ui.js] as FlowUI
+  [base.css / flow.css /\nstatus-bar.css] as Css
+}
+
+package "Paginas de processo\n(uma casca HTML por fluxo)" as Pages {
+  file "processo-a.html" as PageA
+  file "processo-b.html" as PageB
+}
+
+Editor --> Validador : valida definicao
+Editor --> Rascunho : salva rascunho automatico
+Editor --> Preview : pre-visualiza via motor
+Editor ..> DefA : exporta / importa\narquivo de definicao
+Editor ..> DefB : exporta / importa
+
+PageA --> Loader : carrega definicao
+PageB --> Loader
+Loader --> DefA : le window.FLOW_DEFINITION
+Loader --> DefB
+Loader --> FSM : inicializa estado
+FSM --> Rules : avalia condicoes e transicoes
+FSM --> Clock : controla data simulada
+FSM --> Renderer : redesenha fluxo
+FSM --> StatusBar : atualiza indicadores
+Renderer --> FlowUI : usa componentes genericos
+Renderer --> Css : estilos compartilhados
+
+note bottom of Motor
+  Nenhum comportamento de processo vive no motor:
+  tudo vem da definicao gerada pelo construtor.
+end note
+
+note bottom of Pages
+  Cada pagina e apenas uma casca:
+  CSS + motor + arquivo de definicao.
+end note
+@enduml
